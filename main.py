@@ -143,6 +143,7 @@ def run(name, net):
     global criterion
     global optimizer
     global total_param
+    global start_epoch
     best_acc = 0
     net = net.to(device)
     total_param = torchsummary.summary(net, (3, 32, 32))
