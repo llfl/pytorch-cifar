@@ -20,11 +20,16 @@ parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', action='store_true',
                     help='resume from checkpoint')
+parser.add_argument('--train', '-t', default='all', type=str, help='model selection')
+
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
 start_epoch = 0  # start from epoch 0 or last checkpoint epoch
+total_param = 0
+criterion = None
+optimizer = None
 
 # Data
 print('==> Preparing data..')
@@ -72,9 +77,10 @@ models['SENet18'] = SENet18()
 models['ShuffleNetV2'] = ShuffleNetV2(1)
 models['EfficientNetB0'] = EfficientNetB0()
 models['RegNetX_200MF'] = RegNetX_200MF()
+models['lightnet'] = lightnet()
 
 # Training
-def train(epoch):
+def train(net, epoch):
     print('\nEpoch: %d' % epoch)
     net.train()
     train_loss = 0
@@ -97,7 +103,7 @@ def train(epoch):
                      % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
 
-def test(name,epoch):
+def test(name, net ,epoch):
     global best_acc
     net.eval()
     test_loss = 0
@@ -133,9 +139,11 @@ def test(name,epoch):
         torch.save(state, './checkpoint/ckpt.'+name+'.pth')
         best_acc = acc
 
-for name in models:
+def run(name, net):
+    global criterion
+    global optimizer
+    global total_param
     best_acc = 0
-    net = models[name]
     net = net.to(device)
     total_param = torchsummary.summary(net, (3, 32, 32))
 
@@ -157,9 +165,15 @@ for name in models:
                           momentum=0.9, weight_decay=5e-4)
 
     for epoch in range(start_epoch, start_epoch+200):
-        train(epoch)
-        test(name, epoch)
+        train(net, epoch)
+        test(name, net, epoch)
 
     print("best_acc",best_acc)
+
+if args.train == 'all':
+    for name in models:
+        run(name, models['name'])
+else:
+    run(args.train, models[args.train])
 
 
