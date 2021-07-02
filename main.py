@@ -78,6 +78,7 @@ models['ShuffleNetV2'] = ShuffleNetV2(1)
 models['EfficientNetB0'] = EfficientNetB0()
 models['RegNetX_200MF'] = RegNetX_200MF()
 models['lightnet'] = lightnet()
+models['resnet20'] = resnet20()
 
 # Training
 def train(net, epoch):
