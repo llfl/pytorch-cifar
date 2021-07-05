@@ -88,5 +88,8 @@ class ResNet(nn.Module):
         return out
 
 
-def resnet20():
-    return ResNet(BasicBlock, [3, 3, 3])
+def resnet20(pretrain=True):
+    model = ResNet(BasicBlock, [3, 3, 3])
+    if pretrain :
+        model.load_state_dict(torch.load('./resnet20-12fca82f.th'))
+    return model
